@@ -1,6 +1,7 @@
 offset = 0
 offset_y = 100000
 
+
 var timeout;
 document.onmousemove = function(){
   clearTimeout(timeout);
@@ -14,6 +15,7 @@ function get_params(){
         "speed" : document.getElementById("speed").valueAsNumber,
         "nbDots" : document.getElementById("nbDots").valueAsNumber,
         "size" : document.getElementById("size").valueAsNumber,
+        "rough" : document.getElementById("rough").valueAsNumber,
     }
 }
 
@@ -23,15 +25,15 @@ function setup() {
     canvas.parent("canvasForP5")
 
     zoff = 0.001
-    inc = 0.1
     params = get_params();
 
     scl = params["nbDots"]
     speed = params["speed"]
     weight = params["size"]
+    rough = params["rough"]
 
-    cols = floor(windowWidth / scl)
-    rows = floor(windowHeight / scl)
+    cols = floor(windowWidth / scl) + 1
+    rows = floor(windowHeight / scl) + 1
 
 
 }
@@ -40,7 +42,7 @@ function draw() {
 
     updated = get_params()
 
-    if (scl !== updated["nbDots"] || speed !== updated["speed"] || weight !== updated["size"]){
+    if (scl !== updated["nbDots"] || speed !== updated["speed"] || weight !== updated["size"] || rough !== updated["rough"]){
         setup()
     }
 
@@ -50,7 +52,7 @@ function draw() {
         xoff = 0
         for (var x = 0; x < cols; x++){
             const r = noise(yoff, xoff, zoff) * TWO_PI;
-            xoff += inc
+            xoff += rough
             const v = p5.Vector.fromAngle(r);
             push();
             translate(x*scl, y*scl);
@@ -60,7 +62,7 @@ function draw() {
             line(0, 0, scl, 0);
             pop();
         }
-        yoff += inc
+        yoff += rough
     }
     zoff += speed
 }
