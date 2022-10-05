@@ -1,6 +1,3 @@
-width = window.innerWidth
-height = window.innerHeight
-
 offset = 0
 offset_y = 100000
 
@@ -10,32 +7,60 @@ document.onmousemove = function(){
   timeout = setTimeout(function(){console.log("move your mouse");}, 2000);
 }
 
+var cols, rows;
 
+function get_params(){
+    return {
+        "speed" : document.getElementById("speed").valueAsNumber,
+        "nbDots" : document.getElementById("nbDots").valueAsNumber,
+        "size" : document.getElementById("size").valueAsNumber,
+    }
+}
 
 
 function setup() {
     var canvas = createCanvas(windowWidth, windowHeight);
     canvas.parent("canvasForP5")
 
-    speed = document.getElementById("speed").valueAsNumber
-    nbDots = document.getElementById("nbDots").valueAsNumber
-    size = document.getElementById("size").valueAsNumber
-    seeds = Array.from({length: nbDots}, () => ({x:Math.random(), y:Math.random(), z: offset_y * Math.random()}));
+    zoff = 0.001
+    inc = 0.1
+    params = get_params();
 
-    noStroke();
-    fill(73, 90);
+    scl = params["nbDots"]
+    speed = params["speed"]
+    weight = params["size"]
+
+    cols = floor(windowWidth / scl)
+    rows = floor(windowHeight / scl)
+
+
 }
 
 function draw() {
-    // background(201, 10)
-    if (speed !== document.getElementById("speed").valueAsNumber ||
-    size !== document.getElementById("size").valueAsNumber ||
-    nbDots !== document.getElementById("nbDots").valueAsNumber){
+
+    updated = get_params()
+
+    if (scl !== updated["nbDots"] || speed !== updated["speed"] || weight !== updated["size"]){
         setup()
     }
 
-    offset += speed
-    offset_y += speed
-    seeds.map(s => ellipse(windowWidth*(s.x + noise(s.z + offset))/2, windowHeight*(s.y + noise(s.z+offset_y))/2, size, size))
-
+    clear()
+    yoff = 0
+    for (var y = 0; y < rows; y++){
+        xoff = 0
+        for (var x = 0; x < cols; x++){
+            const r = noise(yoff, xoff, zoff) * TWO_PI;
+            xoff += inc
+            const v = p5.Vector.fromAngle(r);
+            push();
+            translate(x*scl, y*scl);
+            rotate(v.heading());
+            stroke(0);
+            strokeWeight(weight);
+            line(0, 0, scl, 0);
+            pop();
+        }
+        yoff += inc
+    }
+    zoff += speed
 }
